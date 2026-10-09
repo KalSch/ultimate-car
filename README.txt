@@ -1,8 +1,11 @@
-Ultimate Car Tycoon — Phase I v0.2.2
-Revision-specific Engineering Notebooks.
-Each road-test entry is labeled by test and date and attached to the exact tested revision.
-Notebook feedback distinguishes observation, engineer interpretation, and comparison with a prior comparable test.
-Committed historical notebooks remain with their revisions.
-Testing compares revisions without exposing hidden numerical scores.
-Engineering changes can improve one behavior while degrading another; there is no perfect vehicle target.
-Migrates v0.2.1/v0.2 saves. No service worker.
+Ultimate Car Tycoon — Phase I v0.2.2.1 Repair
+Fixes a DOM mismatch in v0.2.2 that stopped JavaScript rendering after the static SVG ground line.
+Restores:
+- editable vehicle drawing
+- research cards/buttons
+- project log rendering
+- revision-specific Engineering Notebook heading/context
+Adds defensive notebook DOM guards.
+Preserves uct022 saves and all v0.2.2 engineering-loop mechanics.
+No service worker.
+Future visual requirement retained in design plan: Drafting should look like a sketch; Construct Prototype should transform the exact design into a more realistic physical prototype representation.

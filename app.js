@@ -94,8 +94,9 @@ function render(doSave=true){
  :state.revisions.length===1?"<b>Tutorial — Revision 002: Revise.</b> Revision 001 is permanent. Respond to the engineering observations however you choose, then commit Revision 002."
  :"<b>The rails are off.</b> You control the project from here.";
  const nbRev=currentNotebookRevision();
- $("#notebookTitle").textContent=nbRev?`Engineering Notebook — Revision ${String(nbRev.num).padStart(3,"0")}`:"Engineering Notebook";
- $("#notebookContext").textContent=nbRev?(state.revisions.length===next-1?`Test evidence for the last committed design. Use it while developing Revision ${String(next).padStart(3,"0")}. Once the next revision is committed, this notebook is frozen.`:""):"Observations are attached to individual committed revisions.";
+ const nt=$("#notebookTitle"),nc=$("#notebookContext");
+ if(nt)nt.textContent=nbRev?`Engineering Notebook — Revision ${String(nbRev.num).padStart(3,"0")}`:"Engineering Notebook";
+ if(nc)nc.textContent=nbRev?`Test evidence for Revision ${String(nbRev.num).padStart(3,"0")}. Use it while developing Revision ${String(next).padStart(3,"0")}. Once the next revision is committed, this notebook remains frozen with that revision.`:"Observations are attached to individual committed revisions.";
  $("#notes").innerHTML=notes().map(x=>{
    if(x.test)return `<div class="note testNote ${x.severity||""}"><div class="testHead"><span class="testTag">${x.test}</span><span class="testDate">${x.date}</span></div><div>${x.observation}</div>${x.comparison?`<div class="comparison">${x.comparison}</div>`:""}${x.assessment?`<div class="assessment"><b>Engineer’s assessment:</b> ${x.assessment}</div>`:""}</div>`;
    return `<div class="note ${x[0]||""}">${x[1]||""}</div>`;
