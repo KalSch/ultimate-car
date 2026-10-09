@@ -1,3 +1,10 @@
-Ultimate Car Tycoon — Phase I v0.2 — Research Engine
+Ultimate Car Tycoon — Phase I v0.2.1 Integration Pass
 
-Repeatable time-consuming research; hidden d20-style outcome and time rolls; qualitative knowledge only; annual expanding knowledge frontier; invisible future branches; prerequisite-based discoveries; permanent logging. Built on v0.1.2. No service worker during validation.
+Canonical new-game date: January 1, 1885.
+Persistent actual calendar date throughout the interface.
+Time controls: +1 Day, +1 Week, Advance to Next Event.
+Research now runs in simulation days and old v0.2 saves are migrated.
+Research knowledge begins influencing drafting observations.
+Prototype construction is separated from road testing.
+Road tests progressively expand by year in distance, speed, terrain, and endurance.
+No service worker during foundation validation.

@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Ultimate Car Tycoon — Phase I v0.2</title>
-<link rel="stylesheet" href="style.css?v=020">
+<title>Ultimate Car Tycoon — Phase I v0.2.1</title>
+<link rel="stylesheet" href="style.css?v=021">
 </head>
 <body>
-<header><div><small>ULTIMATE CAR TYCOON</small><h1>Project 001 — Experimental Motor Carriage</h1></div><b>1886</b></header>
+<header><div><small>ULTIMATE CAR TYCOON</small><h1>Project 001 — Experimental Motor Carriage</h1></div><b id="headerDate">January 1, 1885</b></header><div class="timebar"><strong id="currentDate">January 1, 1885</strong><div class="timeControls"><button id="advanceDay">+1 Day</button><button id="advanceWeek">+1 Week</button><button id="advanceNext">Advance to Next Event</button></div></div>
 <nav>
 <button class="tab active" data-page="workshop">Workshop</button>
 <button class="tab" data-page="research">Research</button>
@@ -31,11 +31,11 @@
 <div><small>Balance</small><strong id="balance">—</strong></div>
 <div><small>Company knowledge</small><strong id="knowledge">—</strong></div>
 </div>
-<div class="actions"><button id="commit" class="primary">Commit Revision 001</button><button id="prototype" disabled>Construct Prototype</button></div>
+<div class="actions"><button id="commit" class="primary">Commit Revision 001</button><button id="prototype" disabled>Construct Prototype</button></div><div id="testPanel"></div>
 </section>
 
 <section class="panel controls">
-<h2>Drafting Controls</h2>
+<h2>Drafting Controls</h2><div id="draftKnowledge" class="knowledgeNote"></div>
 <p>Each slider and number box controls the same design measurement.</p>
 <div id="controls"></div>
 <label>Frame strength<select id="frame"><option value="light">Light timber/steel bracing</option><option value="standard">Standard reinforced frame</option><option value="heavy">Heavy reinforced frame</option></select></label>
@@ -46,10 +46,10 @@
 </div>
 </section>
 
-<section id="research" class="page"><section class="panel wide"><div class="row"><div><h2>Research Office — <span id="gameYear">1886</span></h2><p>Only fields your company can presently conceive are shown.</p></div><button id="advanceTime">Advance 1 Week</button></div><div id="activeResearch"></div><h3>Known Fields of Inquiry</h3><div id="researchCards" class="cards"></div></section></section>
+<section id="research" class="page"><section class="panel wide"><div class="row"><div><h2>Research Office</h2><p>Only fields your company can presently conceive are shown.</p></div></div><div id="activeResearch"></div><h3>Known Fields of Inquiry</h3><div id="researchCards" class="cards"></div></section></section>
 <section id="log" class="page"><section class="panel wide"><h2>Project 001 — Permanent Design Log</h2><div id="logItems"></div></section></section>
 </main>
 
 <dialog id="compareDialog"><h2>Revision Comparison</h2><div id="comparison"></div><button id="closeCompare">Close</button></dialog>
-<script src="app.js?v=020"></script>
+<script src="app.js?v=021"></script>
 </body></html>
