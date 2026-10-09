@@ -1,4 +1,4 @@
-ULTIMATE CAR TYCOON — Phase I v0.1
+ULTIMATE CAR TYCOON — Phase I v0.1.1
 
 This is the first playable vehicle-builder architecture prototype.
 
@@ -24,3 +24,11 @@ Implemented:
 - Installable/offline PWA shell
 
 This is intentionally the foundation only. No dealership, manufacturing, sales, marketing, or modern design systems are included.
+
+v0.1.1 FIXES
+- Sliders and exact numerical fields now control the same underlying parameter and visibly stay synchronized.
+- Commit Revision now persists revisions and advances the two-revision tutorial.
+- Undo/redo rewritten around design snapshots.
+- Research navigation and experiments are active.
+- Project Log navigation is active and displays committed revisions, tests, and research.
+- Service-worker cache version changed to prevent the original broken JavaScript from being reused.
