@@ -1,130 +1,55 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#3a2d1f">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="style.css">
-  <title>Ultimate Car Tycoon — Phase I v0.1.1</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ultimate Car Tycoon — Phase I v0.1.2</title>
+<link rel="stylesheet" href="style.css?v=012">
 </head>
 <body>
-<header>
-  <div>
-    <small>ULTIMATE CAR TYCOON</small>
-    <h1>Experimental Motor Carriage — Project 001</h1>
-  </div>
-  <div class="year">1886</div>
-</header>
-
+<header><div><small>ULTIMATE CAR TYCOON</small><h1>Project 001 — Experimental Motor Carriage</h1></div><b>1886</b></header>
 <nav>
-  <button data-page="workshop" class="active">Workshop</button>
-  <button data-page="research">Research</button>
-  <button data-page="archive">Project Log</button>
+<button class="tab active" data-page="workshop">Workshop</button>
+<button class="tab" data-page="research">Research</button>
+<button class="tab" data-page="log">Project Log</button>
 </nav>
 
 <main>
 <section id="workshop" class="page active">
-  <div class="notice" id="tutorialNotice"></div>
-  <div class="workspace">
-    <aside class="panel">
-      <h2>Drafting Controls</h2>
-      <p class="muted">Drag the handles on the drawing or enter an exact measurement.</p>
-
-      <label>Wheelbase <output id="wheelbaseOut"></output></label>
-      <input id="wheelbase" type="range" min="48" max="90" step=".5">
-      <input id="wheelbaseNum" type="number" min="48" max="90" step=".5">
-
-      <label>Track width <output id="trackOut"></output></label>
-      <input id="track" type="range" min="38" max="64" step=".5">
-      <input id="trackNum" type="number" min="38" max="64" step=".5">
-
-      <label>Wheel diameter <output id="wheelOut"></output></label>
-      <input id="wheel" type="range" min="28" max="52" step=".5">
-      <input id="wheelNum" type="number" min="28" max="52" step=".5">
-
-      <label>Engine position <output id="engineOut"></output></label>
-      <input id="engine" type="range" min="10" max="90" step="1">
-      <input id="engineNum" type="number" min="10" max="90" step="1">
-
-      <label>Seat position <output id="seatOut"></output></label>
-      <input id="seat" type="range" min="10" max="90" step="1">
-      <input id="seatNum" type="number" min="10" max="90" step="1">
-
-      <label>Frame strength</label>
-      <select id="frame">
-        <option value="light">Light timber/steel bracing</option>
-        <option value="standard">Standard reinforced frame</option>
-        <option value="heavy">Heavy reinforced frame</option>
-      </select>
-
-      <div class="buttons">
-        <button id="undo">Undo</button>
-        <button id="redo">Redo</button>
-      </div>
-    </aside>
-
-    <div class="drawing panel">
-      <div class="drawing-head">
-        <div>
-          <h2 id="revisionTitle">Design Revision 001</h2>
-          <p class="muted">Side elevation — experimental motor carriage</p>
-        </div>
-        <button id="compareBtn" disabled>Compare revisions</button>
-      </div>
-
-      <svg id="carSvg" viewBox="0 0 900 430" aria-label="Editable vehicle drawing">
-        <line x1="80" y1="350" x2="820" y2="350" class="ground"/>
-        <g id="car"></g>
-      </svg>
-      <p class="dragHint">Drag either wheel horizontally to change wheelbase. Drag a wheel edge vertically to resize both wheels.</p>
-
-      <div class="readouts">
-        <div><span>Estimated mass</span><strong id="mass"></strong></div>
-        <div><span>Estimated cost</span><strong id="cost"></strong></div>
-        <div><span>Balance</span><strong id="balance"></strong></div>
-        <div><span>Company knowledge</span><strong id="knowledge"></strong></div>
-      </div>
-
-      <div class="buttons primary">
-        <button id="commit">Commit Revision 001</button>
-        <button id="prototype" disabled>Construct Prototype</button>
-      </div>
-    </div>
-
-    <aside class="panel">
-      <h2>Engineering Notebook</h2>
-      <div id="observations"></div>
-      <hr>
-      <h3>Known ≠ Actual</h3>
-      <p class="muted">The simulation tracks the machine's true properties separately. This notebook only reports what your company has learned.</p>
-    </aside>
-  </div>
+<div id="tutorial" class="notice"></div>
+<div class="grid">
+<section class="panel drawing">
+<div class="row"><div><h2 id="revTitle">Design Revision 001</h2><p>Side elevation — experimental motor carriage</p></div><button id="compare" disabled>Compare revisions</button></div>
+<svg id="vehicle" viewBox="0 0 900 430" role="img" aria-label="Editable vehicle sketch">
+<line x1="70" y1="350" x2="830" y2="350" class="ground"/>
+<g id="car"></g>
+</svg>
+<p class="hint">Drag either gold axle handle horizontally to change wheelbase. Drag the gold wheel-size handle vertically to resize both wheels.</p>
+<div class="stats">
+<div><small>Estimated mass</small><strong id="mass">—</strong></div>
+<div><small>Estimated cost</small><strong id="cost">—</strong></div>
+<div><small>Balance</small><strong id="balance">—</strong></div>
+<div><small>Company knowledge</small><strong id="knowledge">—</strong></div>
+</div>
+<div class="actions"><button id="commit" class="primary">Commit Revision 001</button><button id="prototype" disabled>Construct Prototype</button></div>
 </section>
 
-<section id="research" class="page">
-  <div class="panel wide">
-    <h2>Experimental Research — 1886</h2>
-    <p>Research unlocks capabilities, not finished automobiles. Failures may still produce useful knowledge.</p>
-    <div id="researchCards" class="cards"></div>
-  </div>
+<section class="panel controls">
+<h2>Drafting Controls</h2>
+<p>Each slider and number box controls the same design measurement.</p>
+<div id="controls"></div>
+<label>Frame strength<select id="frame"><option value="light">Light timber/steel bracing</option><option value="standard">Standard reinforced frame</option><option value="heavy">Heavy reinforced frame</option></select></label>
+<div class="actions"><button id="undo" disabled>Undo</button><button id="redo" disabled>Redo</button></div>
 </section>
 
-<section id="archive" class="page">
-  <div class="panel wide">
-    <h2>Project 001 — Permanent Design Log</h2>
-    <p class="muted">Committed revisions and test records are never overwritten.</p>
-    <div id="log"></div>
-  </div>
+<section class="panel notes"><h2>Engineering Notebook</h2><div id="notes"></div><hr><h3>Known ≠ Actual</h3><p>The simulation can know more than your company does. This notebook only reports discovered or reasonably inferred information.</p></section>
+</div>
 </section>
+
+<section id="research" class="page"><section class="panel wide"><h2>Experimental Research — 1886</h2><p>Research unlocks capabilities, not finished automobiles. Failure can still create knowledge.</p><div id="researchCards" class="cards"></div></section></section>
+<section id="log" class="page"><section class="panel wide"><h2>Project 001 — Permanent Design Log</h2><div id="logItems"></div></section></section>
 </main>
 
-<dialog id="compareDialog">
-  <h2>Revision Comparison</h2>
-  <div id="compareContent"></div>
-  <button onclick="this.closest('dialog').close()">Close</button>
-</dialog>
-
-<script src="app.js"></script>
-</body>
-</html>
+<dialog id="compareDialog"><h2>Revision Comparison</h2><div id="comparison"></div><button id="closeCompare">Close</button></dialog>
+<script src="app.js?v=012"></script>
+</body></html>
