@@ -15,3 +15,10 @@ dialog{max-width:650px;background:#f5e8c8;border:2px solid #604b33}.compareTable
 .researchStatus{padding:12px;margin:10px 0;background:#fff0c6;border:1px solid #9b8057}.progressTrack{height:12px;background:#c9b58d;border:1px solid #8b724d;margin:8px 0}.progressFill{height:100%;background:#6f5737}.level{font-weight:bold;letter-spacing:.03em}
 
 .timebar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:9px 14px;background:#e8dcc0;border-bottom:1px solid #8b724d}.timeControls{display:flex;gap:7px;flex-wrap:wrap}.timeControls button{min-height:40px}.knowledgeNote{padding:9px;margin:8px 0;background:#f7efd9;border-left:3px solid #8b724d}.testPanel{margin-top:12px}.testGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;margin-top:8px}.testCard{padding:10px;border:1px solid #9b8057;background:#fbf4df}.testCard button{width:100%;margin-top:8px}.testCard.locked{opacity:.55}.testCard small{display:block;min-height:3em}
+
+.notebookContext{font-size:.9rem;opacity:.78;margin-top:-4px}
+.note.testNote{border-left-width:4px;padding:10px 12px}
+.note .testHead{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:5px}
+.note .testTag{font-weight:700}.note .testDate{font-size:.82rem;opacity:.7}
+.note .assessment{margin-top:6px;font-style:italic}
+.note .comparison{margin-top:6px;font-size:.9rem;font-weight:600}

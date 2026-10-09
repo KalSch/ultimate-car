@@ -12,9 +12,12 @@ const specs={
 const initial={wheelbase:62,track:46,wheel:38,engine:34,seat:67,frame:"standard"};
 const fresh=()=>({design:{...initial},revisions:[],records:[],undo:[],redo:[],prototype:null,date:"1885-01-01",activeResearch:null,research:{steering:{knowledge:0,attempts:0},frame:{knowledge:0,attempts:0},ignition:{knowledge:0,attempts:0}},discovered:["steering","frame","ignition"]});
 let state=fresh();
-try{const newer=localStorage.getItem("uct021"),older=localStorage.getItem("uct020");if(newer){state=Object.assign(fresh(),JSON.parse(newer));}else if(older){state=Object.assign(fresh(),JSON.parse(older));if(!state.date){const y=state.year||1885,w=state.week||1,d=new Date(Date.UTC(y,0,1+(w-1)*7));state.date=d.toISOString().slice(0,10);}delete state.year;delete state.week;}}catch(e){state=fresh();}
+try{const newer=localStorage.getItem("uct022"),older=localStorage.getItem("uct021")||localStorage.getItem("uct020");if(newer){state=Object.assign(fresh(),JSON.parse(newer));}else if(older){state=Object.assign(fresh(),JSON.parse(older));if(!state.date){const y=state.year||1885,w=state.week||1,d=new Date(Date.UTC(y,0,1+(w-1)*7));state.date=d.toISOString().slice(0,10);}delete state.year;delete state.week;}}catch(e){state=fresh();}
+state.testHistory=state.testHistory||[];
+state.revisions=(state.revisions||[]).map(r=>({...r,notebook:r.notebook||[]}));
+
 const clone=o=>JSON.parse(JSON.stringify(o));
-const persist=()=>localStorage.setItem("uct021",JSON.stringify(state));
+const persist=()=>localStorage.setItem("uct022",JSON.stringify(state));
 function pushUndo(){state.undo.push(clone(state.design));if(state.undo.length>50)state.undo.shift();state.redo=[];}
 function calc(d=state.design){return{
  mass:Math.round(260+d.wheel*3.2+d.wheelbase*1.5+({light:20,standard:55,heavy:110}[d.frame]||55)),
@@ -66,18 +69,17 @@ function startDrag(e,h,left,right,ground){
  h.addEventListener("pointermove",move);h.addEventListener("pointerup",up);
 }
 function researchDraftingNotes(){const out=[],s=state.research.steering?.knowledge||0,g=state.research.geometry?.knowledge||0,f=state.research.frame?.knowledge||0,m=state.research.materials?.knowledge||0;if(s+g>=220)out.push(["","Company steering research now supports more confident interpretation of directional behavior."]);if(g>=220)out.push(["","Steering Geometry research has made axle spacing and loading relationships a recognized drafting concern."]);if(f+m>=300)out.push(["","Structural research has improved the company's ability to judge frame loading during drafting."]);return out;}
+function currentNotebookRevision(){return state.revisions.length?state.revisions[state.revisions.length-1]:null}
 function notes(){
- const d=state.design,c=calc(),a=[];
- if(!state.revisions.length)a.push(["","No road test exists. Create and commit your first experimental design."]);
- else{
-  if(c.rear>58)a.push(["warning","Engineer hypothesis: the rear appears heavily loaded. Steering behavior is uncertain."]);
-  else if(c.rear<42)a.push(["warning","Engineer hypothesis: forward loading may be excessive."]);
-  else a.push(["","Static inspection suggests reasonably distributed loading. Road behavior remains unknown."]);
-  if(d.wheelbase<56)a.push(["warning","The short axle spacing may make the machine difficult to control. This has not been proven."]);
-  if(d.frame==="light")a.push(["warning","The light frame shows concerning flex during workshop loading."]);
+ const rev=currentNotebookRevision(),a=[];
+ if(!rev){
+  a.push(["","No committed revision exists yet. Commit Revision 001 to establish the first engineering record."]);
+  return a;
  }
- if(state.prototype?.notes)a.push(...state.prototype.notes);a.push(...researchDraftingNotes());
- return a;
+ if(!(rev.notebook||[]).length){
+  a.push(["",`Revision ${String(rev.num).padStart(3,"0")} has no road-test observations yet. Construct a prototype and choose a test.`]);
+ }
+ return [...(rev.notebook||[])];
 }
 function render(doSave=true){
  $("#currentDate").textContent=prettyDate();$("#headerDate").textContent=prettyDate();
@@ -91,13 +93,19 @@ function render(doSave=true){
  $("#tutorial").innerHTML=state.revisions.length===0?"<b>Tutorial — Revision 001: Create.</b> Alter the architecture using drag controls, sliders, or exact measurements."
  :state.revisions.length===1?"<b>Tutorial — Revision 002: Revise.</b> Revision 001 is permanent. Respond to the engineering observations however you choose, then commit Revision 002."
  :"<b>The rails are off.</b> You control the project from here.";
- $("#notes").innerHTML=notes().map(x=>`<div class="note ${x[0]}">${x[1]}</div>`).join("");
+ const nbRev=currentNotebookRevision();
+ $("#notebookTitle").textContent=nbRev?`Engineering Notebook — Revision ${String(nbRev.num).padStart(3,"0")}`:"Engineering Notebook";
+ $("#notebookContext").textContent=nbRev?(state.revisions.length===next-1?`Test evidence for the last committed design. Use it while developing Revision ${String(next).padStart(3,"0")}. Once the next revision is committed, this notebook is frozen.`:""):"Observations are attached to individual committed revisions.";
+ $("#notes").innerHTML=notes().map(x=>{
+   if(x.test)return `<div class="note testNote ${x.severity||""}"><div class="testHead"><span class="testTag">${x.test}</span><span class="testDate">${x.date}</span></div><div>${x.observation}</div>${x.comparison?`<div class="comparison">${x.comparison}</div>`:""}${x.assessment?`<div class="assessment"><b>Engineer’s assessment:</b> ${x.assessment}</div>`:""}</div>`;
+   return `<div class="note ${x[0]||""}">${x[1]||""}</div>`;
+ }).join("");
  $("#draftKnowledge").textContent=`Company understanding — Steering: ${qualitative("steering")}; Frame construction: ${qualitative("frame")}. Research changes what your engineers can recognize and, as fields mature, what drafting capabilities can be introduced.`;draw();renderTests();renderLog();renderResearch();if(doSave)persist();
 }
 $("#undo").addEventListener("click",()=>{if(!state.undo.length)return;state.redo.push(clone(state.design));state.design=state.undo.pop();state.prototype=null;render();});
 $("#redo").addEventListener("click",()=>{if(!state.redo.length)return;state.undo.push(clone(state.design));state.design=state.redo.pop();state.prototype=null;render();});
-$("#commit").addEventListener("click",()=>{const n=state.revisions.length+1,rec={num:n,design:clone(state.design),time:stamp()};state.revisions.push(rec);state.records.unshift({type:"REVISION",text:`Revision ${String(n).padStart(3,"0")} committed.`,time:rec.time});state.undo=[];state.redo=[];state.prototype=null;render();});
-$("#prototype").addEventListener("click",()=>{state.prototype={notes:[]};state.records.unshift({type:"PROTOTYPE",text:`Prototype constructed from Revision ${state.revisions.length}.`,time:stamp()});render();});
+$("#commit").addEventListener("click",()=>{const n=state.revisions.length+1,rec={num:n,design:clone(state.design),time:stamp(),notebook:[]};state.revisions.push(rec);state.records.unshift({type:"REVISION",text:`Revision ${String(n).padStart(3,"0")} committed.`,time:rec.time});state.undo=[];state.redo=[];state.prototype=null;render();});
+$("#prototype").addEventListener("click",()=>{state.prototype={revision:state.revisions.length};state.records.unshift({type:"PROTOTYPE",text:`Prototype constructed from Revision ${state.revisions.length}.`,time:stamp()});render();});
 function availableTests(){const y=simYear();return [
 {name:"Workshop Yard Trial",days:1,min:1885,desc:"Very low speed • under 1 mile • level ground"},
 {name:"Local Road Trial",days:1,min:1885,desc:"Low speed • 1–3 miles • ordinary road"},
@@ -106,8 +114,58 @@ function availableTests(){const y=simYear();return [
 {name:"Rough-Surface Trial",days:2,min:1887,desc:"Uneven road • frame, wheel and fastener stress"},
 {name:"Endurance Run",days:4,min:1888,desc:"Long continuous operation • heat, wear and reliability"}
 ].map(t=>({...t,available:y>=t.min}));}
-function runRoadTest(i){if(!state.prototype)return;const t=availableTests()[i];if(!t||!t.available)return;addDays(t.days);const c=calc(),s=state.research.steering?.knowledge||0,g=state.research.geometry?.knowledge||0,f=state.research.frame?.knowledge||0,m=state.research.materials?.knowledge||0,obs=[];if((t.name.includes("Road")||t.name.includes("Endurance"))&&c.rear>58)obs.push(s+g>350?"Engineers associate increasing steering uncertainty with rearward loading and steering geometry.":"Steering becomes increasingly uncertain as speed rises; the cause is not yet clear.");if(t.name.includes("Rough")&&state.design.frame==="light")obs.push(f+m>450?"Measured frame movement suggests the present light structure is insufficient for repeated uneven-road loading.":"Visible frame movement and loosening occur over repeated impacts.");if(t.name.includes("Hill"))obs.push("The powertrain labors under sustained grade; further investigation may be warranted.");if(t.name.includes("Endurance"))obs.push("Extended running reveals heat and wear behavior that shorter trials could not expose.");if(!obs.length)obs.push("No immediate critical failure was observed. This trial does not establish performance outside the conditions tested.");state.prototype.notes=[...state.prototype.notes,[obs.some(x=>/uncertain|insufficient|loosening|labors/i.test(x))?"warning":"",obs.join(" ")]];state.records.unshift({type:"TEST",text:`${t.name} completed — ${t.desc}. ${obs.join(" ")}`,time:stamp()});render();}
-function renderTests(){const p=$("#testPanel");if(!state.prototype){p.innerHTML="";return;}p.className="testPanel";p.innerHTML=`<hr><h3>Road Testing</h3><p>Choose the conditions under which this prototype will be tested. More demanding tests become practical as the automotive field develops.</p><div class="testGrid">${availableTests().map((t,i)=>`<div class="testCard ${t.available?"":"locked"}"><b>${t.name}</b><small>${t.desc}</small><button data-test="${i}" ${t.available?"":"disabled"}>${t.available?"Run Test":`Not yet practical (${t.min})`}</button></div>`).join("")}</div>`;$$('[data-test]').forEach(b=>b.addEventListener('click',()=>runRoadTest(Number(b.dataset.test))));}
+function hiddenBehavior(d){
+ const c=calc(d);
+ return {
+  highSpeedStability:(d.wheelbase*.62+d.track*.72)-Math.abs(c.rear-50)*1.7-d.wheel*.12,
+  lowSpeedEase:105-d.wheelbase*.38-d.track*.32-Math.abs(c.rear-52)*.55,
+  roughDurability:({light:34,standard:58,heavy:82}[d.frame]||58)-d.wheel*.12,
+  hillAbility:88-(c.mass/18)-Math.abs(d.engine-42)*.18,
+  endurance:({light:48,standard:63,heavy:71}[d.frame]||63)-(c.mass/55)+Math.min(12,d.wheel*.16)
+ };
+}
+function comparisonPhrase(test,current,prior){
+ if(!prior)return "";
+ const map=test.includes("Hill")?"hillAbility":test.includes("Rough")?"roughDurability":test.includes("Endurance")?"endurance":test.includes("Yard")?"lowSpeedEase":"highSpeedStability";
+ const diff=current[map]-prior.behavior[map];
+ if(diff>5)return "Compared with the previous revision tested under similar conditions, behavior is noticeably improved.";
+ if(diff<-5)return "Compared with the previous revision tested under similar conditions, behavior is noticeably worse.";
+ if(Math.abs(diff)>2)return diff>0?"A modest improvement is apparent compared with the previous comparable trial.":"A modest deterioration is apparent compared with the previous comparable trial.";
+ return "No clear change from the previous comparable trial could be established.";
+}
+function runRoadTest(i){
+ if(!state.prototype)return;
+ const t=availableTests()[i];if(!t||!t.available)return;
+ const rev=state.revisions.find(r=>r.num===state.prototype.revision);if(!rev)return;
+ addDays(t.days);
+ const b=hiddenBehavior(rev.design),s=state.research.steering?.knowledge||0,g=state.research.geometry?.knowledge||0,f=state.research.frame?.knowledge||0,m=state.research.materials?.knowledge||0;
+ let observation="",assessment="",severity="";
+ if(t.name.includes("Yard")){
+   observation=b.lowSpeedEase<55?"Steering requires considerable effort during tight, low-speed turns.":"The machine can be directed through tight low-speed turns without exceptional effort.";
+   assessment=s+g>350?"Steering effort appears related to the present axle spacing, track, and steering arrangement.":"The cause of the steering effort is uncertain; linkage friction, loading, or geometry may contribute.";
+ }else if(t.name.includes("Hill")){
+   observation=b.hillAbility<30?"Road speed falls sharply on sustained grades and the mechanism labors heavily.":"The machine completes the grade, though sustained climbing places a noticeable load on the mechanism.";
+   assessment="Changes that improve climbing may affect mass, durability, traction, or behavior elsewhere; further trials are advised.";
+ }else if(t.name.includes("Rough")){
+   observation=b.roughDurability<45?"Repeated impacts produce visible frame movement and loosening at several fasteners.":"The structure tolerates the uneven surface with limited visible movement, though repeated impacts remain severe.";
+   assessment=f+m>450?"Frame rigidity and load paths are now credible areas for investigation. Added structure may also increase mass.":"The source of movement is not yet certain; frame construction, fasteners, wheel loads, and road shock may all contribute.";
+ }else if(t.name.includes("Endurance")){
+   observation=b.endurance<45?"Extended running produces increasing heat, vibration, and signs of wear not apparent in shorter trials.":"Extended running exposes wear and heat, but no immediate terminal failure occurs.";
+   assessment="Long-duration reliability cannot be inferred from short trials. Changes that increase strength or cooling may carry weight and complexity penalties.";
+ }else{
+   observation=b.highSpeedStability<55?"Directional instability becomes increasingly noticeable as road speed rises.":"The carriage holds its course reasonably well within the speeds attempted, though road irregularities still disturb it.";
+   assessment=s+g>350?"Engineers suspect an interaction among steering geometry, axle spacing, track, and load distribution. No single corrective change is established.":"The cause cannot yet be isolated. Steering arrangement, loading, frame movement, or road shock may be involved.";
+ }
+ if(/considerable|sharply|visible frame|instability|increasing heat/i.test(observation))severity="warning";
+ const prior=[...(state.testHistory||[])].reverse().find(x=>x.test===t.name&&x.revision!==rev.num);
+ const comparison=comparisonPhrase(t.name,b,prior);
+ const entry={test:t.name,date:stamp(),observation,assessment,comparison,severity};
+ rev.notebook=rev.notebook||[];rev.notebook.push(entry);
+ state.testHistory.push({revision:rev.num,test:t.name,date:stamp(),behavior:b});
+ state.records.unshift({type:"TEST",text:`Revision ${String(rev.num).padStart(3,"0")} — ${t.name} completed. ${observation}`,time:stamp()});
+ render();
+}
+function renderTests(){const p=$("#testPanel");if(!state.prototype){p.innerHTML="";return;}p.className="testPanel";p.innerHTML=`<hr><h3>Road Testing — Revision ${String(state.prototype.revision).padStart(3,"0")}</h3><p>Every result is written to this revision’s Engineering Notebook. Choose the conditions under which this prototype will be tested. More demanding tests become practical as the automotive field develops.</p><div class="testGrid">${availableTests().map((t,i)=>`<div class="testCard ${t.available?"":"locked"}"><b>${t.name}</b><small>${t.desc}</small><button data-test="${i}" ${t.available?"":"disabled"}>${t.available?"Run Test":`Not yet practical (${t.min})`}</button></div>`).join("")}</div>`;$$('[data-test]').forEach(b=>b.addEventListener('click',()=>runRoadTest(Number(b.dataset.test))));}
 $("#compare").addEventListener("click",()=>{const a=state.revisions[state.revisions.length-1];const rows=Object.entries(specs).map(([k,s])=>`<tr><td>${s.label}</td><td>${a.design[k]}${s.unit}</td><td>${state.design[k]}${s.unit}</td></tr>`).join("")+`<tr><td>Frame</td><td>${a.design.frame}</td><td>${state.design.frame}</td></tr>`;$("#comparison").innerHTML=`<table class="compareTable"><tr><th>Parameter</th><th>Revision ${a.num}</th><th>Working</th></tr>${rows}</table>`;$("#compareDialog").showModal();});
 $("#closeCompare").addEventListener("click",()=>$("#compareDialog").close());
 const fields={steering:{title:"Steering & Control",desc:"Investigate steering linkages, axle behavior, and directional control.",baseWeeks:5},frame:{title:"Frame Construction",desc:"Study bracing, load paths, rigidity, and practical construction.",baseWeeks:6},ignition:{title:"Ignition & Combustion Control",desc:"Investigate more dependable methods of initiating and controlling combustion.",baseWeeks:7},geometry:{title:"Steering Geometry",desc:"A newly recognized field concerning linkage geometry, axle placement, and directional behavior.",baseWeeks:8},materials:{title:"Structural Materials",desc:"Investigate how available materials behave under repeated vehicle loads.",baseWeeks:9}};

@@ -1,10 +1,8 @@
-Ultimate Car Tycoon — Phase I v0.2.1 Integration Pass
-
-Canonical new-game date: January 1, 1885.
-Persistent actual calendar date throughout the interface.
-Time controls: +1 Day, +1 Week, Advance to Next Event.
-Research now runs in simulation days and old v0.2 saves are migrated.
-Research knowledge begins influencing drafting observations.
-Prototype construction is separated from road testing.
-Road tests progressively expand by year in distance, speed, terrain, and endurance.
-No service worker during foundation validation.
+Ultimate Car Tycoon — Phase I v0.2.2
+Revision-specific Engineering Notebooks.
+Each road-test entry is labeled by test and date and attached to the exact tested revision.
+Notebook feedback distinguishes observation, engineer interpretation, and comparison with a prior comparable test.
+Committed historical notebooks remain with their revisions.
+Testing compares revisions without exposing hidden numerical scores.
+Engineering changes can improve one behavior while degrading another; there is no perfect vehicle target.
+Migrates v0.2.1/v0.2 saves. No service worker.
