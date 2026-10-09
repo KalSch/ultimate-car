@@ -1,0 +1,8 @@
+{
+  "name": "Ultimate Car Tycoon \u2014 Phase I",
+  "short_name": "Car Tycoon",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#d9c8a7",
+  "theme_color": "#3a2d1f"
+}
