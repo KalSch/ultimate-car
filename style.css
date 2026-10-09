@@ -11,3 +11,5 @@ main{padding:12px}.page{display:none}.page.active{display:block}.notice{max-widt
 .note,.logItem,.card{padding:9px;margin:8px 0;background:#e7d5b0;border-left:4px solid #80603b}.warning{border-left-color:#9a3f30}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.card button{width:100%}
 dialog{max-width:650px;background:#f5e8c8;border:2px solid #604b33}.compareTable{width:100%;border-collapse:collapse}.compareTable th,.compareTable td{padding:7px;border-bottom:1px solid #bca57d;text-align:left}
 @media(max-width:950px){.grid{grid-template-columns:1fr}.drawing{order:-1}}
+
+.researchStatus{padding:12px;margin:10px 0;background:#fff0c6;border:1px solid #9b8057}.progressTrack{height:12px;background:#c9b58d;border:1px solid #8b724d;margin:8px 0}.progressFill{height:100%;background:#6f5737}.level{font-weight:bold;letter-spacing:.03em}
