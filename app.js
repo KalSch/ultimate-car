@@ -12,16 +12,19 @@ const specs={
 const initial={wheelbase:62,track:46,wheel:38,engine:34,seat:67,frame:"standard"};
 const fresh=()=>({design:{...initial},revisions:[],records:[],undo:[],redo:[],prototype:null,date:"1885-01-01",activeResearch:null,research:{steering:{knowledge:0,attempts:0},frame:{knowledge:0,attempts:0},ignition:{knowledge:0,attempts:0}},discovered:["steering","frame","ignition"]});
 let state=fresh();
-try{const newer=localStorage.getItem("uct022"),older=localStorage.getItem("uct021")||localStorage.getItem("uct020");if(newer){state=Object.assign(fresh(),JSON.parse(newer));}else if(older){state=Object.assign(fresh(),JSON.parse(older));if(!state.date){const y=state.year||1885,w=state.week||1,d=new Date(Date.UTC(y,0,1+(w-1)*7));state.date=d.toISOString().slice(0,10);}delete state.year;delete state.week;}}catch(e){state=fresh();}
+try{const newer=localStorage.getItem("uct023")||localStorage.getItem("uct022"),older=localStorage.getItem("uct021")||localStorage.getItem("uct020");if(newer){state=Object.assign(fresh(),JSON.parse(newer));}else if(older){state=Object.assign(fresh(),JSON.parse(older));if(!state.date){const y=state.year||1885,w=state.week||1,d=new Date(Date.UTC(y,0,1+(w-1)*7));state.date=d.toISOString().slice(0,10);}delete state.year;delete state.week;}}catch(e){state=fresh();}
 state.testHistory=state.testHistory||[];
+state.design.steeringAngle=state.design.steeringAngle??0;
+state.design.frameBracing=state.design.frameBracing??0;
+state.design.ignitionAdvance=state.design.ignitionAdvance??0;
 state.revisions=(state.revisions||[]).map(r=>({...r,notebook:r.notebook||[]}));
 
 const clone=o=>JSON.parse(JSON.stringify(o));
-const persist=()=>localStorage.setItem("uct022",JSON.stringify(state));
+const persist=()=>localStorage.setItem("uct023",JSON.stringify(state));
 function pushUndo(){state.undo.push(clone(state.design));if(state.undo.length>50)state.undo.shift();state.redo=[];}
 function calc(d=state.design){return{
- mass:Math.round(260+d.wheel*3.2+d.wheelbase*1.5+({light:20,standard:55,heavy:110}[d.frame]||55)),
- cost:(118+d.wheel*.65+d.wheelbase*.42+({light:8,standard:19,heavy:38}[d.frame]||19)).toFixed(2),
+ mass:Math.round(260+(d.frameBracing||0)*1.1+d.wheel*3.2+d.wheelbase*1.5+({light:20,standard:55,heavy:110}[d.frame]||55)),
+ cost:(118+(d.frameBracing||0)*.18+d.wheel*.65+d.wheelbase*.42+({light:8,standard:19,heavy:38}[d.frame]||19)).toFixed(2),
  rear:Math.round(50+(d.engine-50)*.22+(d.seat-50)*.15)
 };}
 function controlHTML(k,s){return `<div class="control"><label>${s.label}<output id="${k}Out"></output></label><input id="${k}Range" type="range" min="${s.min}" max="${s.max}" step="${s.step}"><input id="${k}Num" type="number" min="${s.min}" max="${s.max}" step="${s.step}"></div>`;}
@@ -79,17 +82,49 @@ function notes(){
  if(!(rev.notebook||[]).length){
   a.push(["",`Revision ${String(rev.num).padStart(3,"0")} has no road-test observations yet. Construct a prototype and choose a test.`]);
  }
- return [...(rev.notebook||[])];
+ return [...(rev.notebook||[])].reverse();
+}
+
+function researchK(k){return state.research?.[k]?.knowledge||0}
+function workshopCapabilities(){
+ const a=["Basic dimensions & axle placement"];
+ if(researchK("steering")>=180)a.push("Improved steering observations");
+ if(researchK("geometry")>=180)a.push("Steering geometry measurement");
+ if(researchK("geometry")>=420)a.push("Deliberate steering geometry adjustment");
+ if(researchK("frame")>=180)a.push("Improved frame-load observations");
+ if(researchK("materials")>=220)a.push("Structural material assessment");
+ if(researchK("frame")>=420&&researchK("materials")>=300)a.push("Deliberate frame bracing specification");
+ if(researchK("ignition")>=240)a.push("Ignition adjustment & diagnosis");
+ return a;
+}
+function renderCapabilities(){
+ const el=$("#capabilities"); if(!el)return;
+ el.innerHTML=`<b>Workshop capabilities developed</b><br>${workshopCapabilities().map(x=>`<span class="cap">${x}</span>`).join("")}<div class="unlockedControls" id="unlockedControls"></div>`;
+ const u=$("#unlockedControls"), rows=[];
+ const add=(label,key,min,max,step,unit,why)=>rows.push(`<div class="unlockedControl"><label><b>${label}</b> <output>${state.design[key]}${unit}</output></label><input data-u="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${state.design[key]}"><input data-un="${key}" type="number" min="${min}" max="${max}" step="${step}" value="${state.design[key]}"><small>${why}</small></div>`);
+ if(researchK("geometry")>=420)add("Steering geometry adjustment","steeringAngle",-8,8,.5,"°","Research has made deliberate geometry adjustment possible. Greater stability can demand more low-speed steering effort.");
+ if(researchK("frame")>=420&&researchK("materials")>=300)add("Frame bracing","frameBracing",0,100,5,"%","Additional bracing can improve rigidity, but adds mass and cost.");
+ if(researchK("ignition")>=240)add("Ignition adjustment","ignitionAdvance",-10,10,1,"°","Ignition can now be deliberately adjusted; an advantage under one condition may be a disadvantage under another.");
+ u.innerHTML=rows.length?rows.join(""):"<small>No additional drafting controls have been developed yet. Research can turn observations into deliberate engineering capability.</small>";
+ u.querySelectorAll("[data-u]").forEach(r=>{const k=r.dataset.u,n=u.querySelector(`[data-un="${k}"]`),sync=v=>{v=Math.max(+r.min,Math.min(+r.max,Number(v)||0));state.design[k]=v;state.prototype=null;render()};r.addEventListener("change",()=>sync(r.value));n.addEventListener("change",()=>sync(n.value));});
+}
+function renderRevisionHistory(selected){
+ const list=$("#historyList"),detail=$("#historyDetail");if(!list||!detail)return;
+ list.innerHTML=state.revisions.map(r=>`<button type="button" data-r="${r.num}">Revision ${String(r.num).padStart(3,"0")}</button>`).join("");
+ list.querySelectorAll("[data-r]").forEach(b=>b.addEventListener("click",()=>renderRevisionHistory(Number(b.dataset.r))));
+ const r=state.revisions.find(x=>x.num===(selected||state.revisions.at(-1)?.num));if(!r){detail.innerHTML="<p>No committed revisions yet.</p>";return}
+ const nb=[...(r.notebook||[])].reverse();
+ detail.innerHTML=`<h4>Revision ${String(r.num).padStart(3,"0")} — ${r.time||""}</h4><p class="frozen">Frozen historical record; not editable.</p><p><b>Design:</b> Wheelbase ${r.design.wheelbase}", track ${r.design.track}", wheels ${r.design.wheel}", engine ${r.design.engine}%, seat ${r.design.seat}%, frame ${r.design.frame}.</p><h4>Engineering Notebook</h4>${nb.length?nb.map(n=>`<div class="historyNote"><b>${n.test||"Observation"}</b> — ${n.date||""}<br>${n.observation||n[1]||""}${n.comparison?`<br><b>Comparison:</b> ${n.comparison}`:""}${n.assessment?`<br><i>Engineer’s assessment: ${n.assessment}</i>`:""}</div>`).join(""):"<p>No tests recorded for this revision.</p>"}`;
 }
 function render(doSave=true){
- $("#currentDate").textContent=prettyDate();$("#headerDate").textContent=prettyDate();
+ $("#currentDate").textContent=prettyDate();$("#headerDate").textContent=prettyDate();renderCapabilities();
  const d=state.design,c=calc(),next=state.revisions.length+1;
  Object.entries(specs).forEach(([k,s])=>{$("#"+k+"Range").value=d[k];$("#"+k+"Num").value=d[k];$("#"+k+"Out").textContent=(s.step<1?Number(d[k]).toFixed(1):d[k])+s.unit;});
  $("#frame").value=d.frame;$("#mass").textContent=c.mass+" lb";$("#cost").textContent="$"+c.cost;
  $("#balance").textContent=state.prototype?c.rear+"% rear (estimated)":"Not measured";
  $("#knowledge").textContent=state.prototype?"Road-tested":"Workshop estimates only";
  $("#revTitle").textContent="Design Revision "+String(next).padStart(3,"0");$("#commit").textContent="Commit Revision "+String(next).padStart(3,"0");
- $("#prototype").disabled=state.revisions.length<2;$("#compare").disabled=state.revisions.length<1;$("#undo").disabled=!state.undo.length;$("#redo").disabled=!state.redo.length;
+ $("#prototype").disabled=state.revisions.length<2;$("#compare").disabled=state.revisions.length<1;$("#historyBtn").disabled=state.revisions.length<1;$("#undo").disabled=!state.undo.length;$("#redo").disabled=!state.redo.length;
  $("#tutorial").innerHTML=state.revisions.length===0?"<b>Tutorial — Revision 001: Create.</b> Alter the architecture using drag controls, sliders, or exact measurements."
  :state.revisions.length===1?"<b>Tutorial — Revision 002: Revise.</b> Revision 001 is permanent. Respond to the engineering observations however you choose, then commit Revision 002."
  :"<b>The rails are off.</b> You control the project from here.";
@@ -118,11 +153,11 @@ function availableTests(){const y=simYear();return [
 function hiddenBehavior(d){
  const c=calc(d);
  return {
-  highSpeedStability:(d.wheelbase*.62+d.track*.72)-Math.abs(c.rear-50)*1.7-d.wheel*.12,
-  lowSpeedEase:105-d.wheelbase*.38-d.track*.32-Math.abs(c.rear-52)*.55,
-  roughDurability:({light:34,standard:58,heavy:82}[d.frame]||58)-d.wheel*.12,
+  highSpeedStability:(d.wheelbase*.62+d.track*.72)-Math.abs(c.rear-50)*1.7-d.wheel*.12+(d.steeringAngle||0)*1.8,
+  lowSpeedEase:105-d.wheelbase*.38-d.track*.32-Math.abs(c.rear-52)*.55-(d.steeringAngle||0)*1.6,
+  roughDurability:({light:34,standard:58,heavy:82}[d.frame]||58)-d.wheel*.12+(d.frameBracing||0)*.22,
   hillAbility:88-(c.mass/18)-Math.abs(d.engine-42)*.18,
-  endurance:({light:48,standard:63,heavy:71}[d.frame]||63)-(c.mass/55)+Math.min(12,d.wheel*.16)
+  endurance:({light:48,standard:63,heavy:71}[d.frame]||63)-(c.mass/55)+Math.min(12,d.wheel*.16)+(d.frameBracing||0)*.05-Math.abs(d.ignitionAdvance||0)*.12
  };
 }
 function comparisonPhrase(test,current,prior){
@@ -185,8 +220,18 @@ function advanceWeek(){processDays(7)}
 function advanceNext(){if(state.activeResearch)processDays(state.activeResearch.left)}
 function completeResearch(){const a=state.activeResearch,k=a.key,r=a.outcome,rec=state.research[k];let gain,label;if(r===1){gain=8+Math.floor(Math.random()*8);label="Serious Setback"}else if(r<=5){gain=18+Math.floor(Math.random()*18);label="Limited Finding"}else if(r<=9){gain=35+Math.floor(Math.random()*25);label="Useful Observation"}else if(r<=13){gain=60+Math.floor(Math.random()*35);label="Productive Result"}else if(r<=17){gain=95+Math.floor(Math.random()*45);label="Strong Finding"}else if(r<=19){gain=145+Math.floor(Math.random()*55);label="Breakthrough"}else{gain=220+Math.floor(Math.random()*80);label="Major Breakthrough"}const ratio=rec.knowledge/frontier();gain=Math.max(3,Math.round(gain*(ratio>.95?.12:ratio>.85?.3:ratio>.7?.55:1)));rec.knowledge+=gain;rec.attempts++;state.records.unshift({type:"RESEARCH",text:`${fields[k].title} concluded — ${label}. ${researchNarrative(k,label)}`,time:stamp()});state.activeResearch=null;discoverFields()}
 function researchNarrative(k,label){const level=qualitative(k);if(label==="Serious Setback")return"The experiment failed to produce a usable solution, but the failure conditions have been documented for future work.";if(level==="Near the Contemporary Frontier"||level==="Contemporary Mastery")return"The work largely confirms principles already understood. Engineers believe major further progress may depend on new methods, related discoveries, or the passage of technological time.";if(label.includes("Breakthrough"))return"The team has identified relationships that substantially change its understanding of the field and suggest new lines of investigation.";return"The investigation has added useful observations to the company's growing body of knowledge."}
-function renderResearch(){const a=state.activeResearch;$("#activeResearch").innerHTML=a?`<div class="researchStatus"><b>Research in progress: ${fields[a.key].title}</b><p>Engineers are working. Completion remains uncertain.</p><div class="progressTrack"><div class="progressFill" style="width:${((a.total-a.left)/a.total)*100}%"></div></div><small>${a.left>7?"Work continues.":a.left>2?"The investigation appears to be nearing completion.":"The investigation appears close to conclusion."}</small></div>`:`<div class="researchStatus"><b>No active investigation.</b> Select a known field to begin research.</div>`;$("#researchCards").innerHTML=state.discovered.map(k=>{const f=fields[k],q=qualitative(k),attempts=state.research[k]?.attempts||0;return`<div class="card"><h3>${f.title}</h3><div class="level">${q}</div><p>${f.desc}</p><small>${attempts?`Recorded investigations: ${attempts}`:"No completed investigation yet."}</small><button data-research="${k}" ${a?"disabled":""}>Authorize Investigation</button></div>`}).join("");$$("[data-research]").forEach(b=>b.addEventListener("click",()=>startResearch(b.dataset.research)))}
+function fieldEffect(k){
+ if(k==="steering")return researchK(k)>=180?"Workshop effect: improved steering observations.":"No practical Workshop capability developed yet.";
+ if(k==="geometry")return researchK(k)>=420?"Workshop effect: steering geometry adjustment unlocked.":researchK(k)>=180?"Workshop effect: steering geometry measurement developed.":"No practical Workshop capability developed yet.";
+ if(k==="frame")return researchK(k)>=420&&researchK("materials")>=300?"Workshop effect: frame bracing specification unlocked.":researchK(k)>=180?"Workshop effect: improved frame-load observations.":"No practical Workshop capability developed yet.";
+ if(k==="materials")return researchK(k)>=300&&researchK("frame")>=420?"Workshop effect: frame bracing specification unlocked.":researchK(k)>=220?"Workshop effect: structural material assessment developed.":"No practical Workshop capability developed yet.";
+ if(k==="ignition")return researchK(k)>=240?"Workshop effect: ignition adjustment & diagnosis unlocked.":"No practical Workshop capability developed yet.";
+ return "";
+}
+function renderResearch(){const a=state.activeResearch;$("#activeResearch").innerHTML=a?`<div class="researchStatus"><b>Research in progress: ${fields[a.key].title}</b><p>Engineers are working. Completion remains uncertain.</p><div class="progressTrack"><div class="progressFill" style="width:${((a.total-a.left)/a.total)*100}%"></div></div><small>${a.left>7?"Work continues.":a.left>2?"The investigation appears to be nearing completion.":"The investigation appears close to conclusion."}</small></div>`:`<div class="researchStatus"><b>No active investigation.</b> Select a known field to begin research.</div>`;$("#researchCards").innerHTML=state.discovered.map(k=>{const f=fields[k],q=qualitative(k),attempts=state.research[k]?.attempts||0;return`<div class="card"><h3>${f.title}</h3><div class="level">${q}</div><p>${f.desc}</p><small>${attempts?`Recorded investigations: ${attempts}`:"No completed investigation yet."}<span class="researchEffect">${fieldEffect(k)}</span></small><button data-research="${k}" ${a?"disabled":""}>Authorize Investigation</button></div>`}).join("");$$("[data-research]").forEach(b=>b.addEventListener("click",()=>startResearch(b.dataset.research)))}
 function renderLog(){$("#logItems").innerHTML=state.records.length?state.records.map(r=>`<div class="logItem"><b>${r.type}</b> — ${r.text}<br><small>${r.time}</small></div>`).join(""):"<p>No permanent records yet.</p>";}
+$("#historyBtn").addEventListener("click",()=>{const p=$("#revisionHistory");p.hidden=false;renderRevisionHistory();p.scrollIntoView({behavior:"smooth",block:"start"});});
+$("#closeHistory").addEventListener("click",()=>{$("#revisionHistory").hidden=true;});
 $("#advanceDay").addEventListener("click",advanceDay);$("#advanceWeek").addEventListener("click",advanceWeek);$("#advanceNext").addEventListener("click",advanceNext);
 $$(".tab").forEach(b=>b.addEventListener("click",()=>{$$(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");$$(".page").forEach(x=>x.classList.remove("active"));$("#"+b.dataset.page).classList.add("active");}));
 render();

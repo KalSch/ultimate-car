@@ -22,3 +22,14 @@ dialog{max-width:650px;background:#f5e8c8;border:2px solid #604b33}.compareTable
 .note .testTag{font-weight:700}.note .testDate{font-size:.82rem;opacity:.7}
 .note .assessment{margin-top:6px;font-style:italic}
 .note .comparison{margin-top:6px;font-size:.9rem;font-weight:600}
+
+.rowActions{display:flex;gap:8px;flex-wrap:wrap}
+.capabilityStrip{margin:10px 0 16px;padding:10px 12px;border-left:4px solid #8b724d;background:#f7efd9}
+.capabilityStrip .cap{display:inline-block;margin:4px 6px 2px 0;padding:4px 7px;border:1px solid #aa936b;background:#fff8e8;font-size:.88rem}
+.unlockedControls{margin-top:14px;padding-top:12px;border-top:1px solid #b7a27f}
+.unlockedControl{margin:12px 0}.unlockedControl small{display:block;margin-top:4px}
+.revisionHistory{margin-top:16px;padding:12px;border:1px solid #a58b61;background:#fbf4df}
+.historyHead{display:flex;justify-content:space-between;gap:10px;align-items:center}.historyHead h3{margin:0}
+.historyList{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.historyList button{min-height:40px}
+.historyNote{padding:8px 0;border-bottom:1px dotted #b7a27f}.historyNote:last-child{border-bottom:0}
+.frozen{font-style:italic;opacity:.75}.researchEffect{display:block;margin-top:7px;font-weight:700}

@@ -1,11 +1,10 @@
-Ultimate Car Tycoon — Phase I v0.2.2.1 Repair
-Fixes a DOM mismatch in v0.2.2 that stopped JavaScript rendering after the static SVG ground line.
-Restores:
-- editable vehicle drawing
-- research cards/buttons
-- project log rendering
-- revision-specific Engineering Notebook heading/context
-Adds defensive notebook DOM guards.
-Preserves uct022 saves and all v0.2.2 engineering-loop mechanics.
-No service worker.
-Future visual requirement retained in design plan: Drafting should look like a sketch; Construct Prototype should transform the exact design into a more realistic physical prototype representation.
+Ultimate Car Tycoon — Phase I v0.2.3 Engineering Workspace
+- Existing iPhone/iPad responsive layout preserved.
+- Engineering Notebook: newest test first.
+- Revision History: browse every committed revision and frozen notebook.
+- Research cards now show concrete Workshop effects.
+- Research can unlock actual drafting controls for steering geometry, frame bracing, and ignition adjustment.
+- Combined research prerequisites can be required.
+- New controls affect hidden vehicle behavior with tradeoffs; no perfect setting.
+- v0.2.2.x saves migrate forward.
+- No service worker.

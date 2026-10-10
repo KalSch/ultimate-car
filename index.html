@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Ultimate Car Tycoon — Phase I v0.2.2.1</title>
-<link rel="stylesheet" href="style.css?v=0221">
+<title>Ultimate Car Tycoon — Phase I v0.2.3</title>
+<link rel="stylesheet" href="style.css?v=023">
 </head>
 <body>
 <header><div><small>ULTIMATE CAR TYCOON</small><h1>Project 001 — Experimental Motor Carriage</h1></div><b id="headerDate">January 1, 1885</b></header><div class="timebar"><strong id="currentDate">January 1, 1885</strong><div class="timeControls"><button id="advanceDay">+1 Day</button><button id="advanceWeek">+1 Week</button><button id="advanceNext">Advance to Next Event</button></div></div>
@@ -19,7 +19,7 @@
 <div id="tutorial" class="notice"></div>
 <div class="grid">
 <section class="panel drawing">
-<div class="row"><div><h2 id="revTitle">Design Revision 001</h2><p>Side elevation — experimental motor carriage</p></div><button id="compare" disabled>Compare revisions</button></div>
+<div class="row"><div><h2 id="revTitle">Design Revision 001</h2><p>Side elevation — experimental motor carriage</p></div><div class="rowActions"><button id="compare" disabled>Compare revisions</button><button id="historyBtn" disabled>Revision History</button></div></div>
 <svg id="vehicle" viewBox="0 0 900 430" role="img" aria-label="Editable vehicle sketch">
 <line x1="70" y1="350" x2="830" y2="350" class="ground"/>
 <g id="car"></g>
@@ -35,14 +35,19 @@
 </section>
 
 <section class="panel controls">
-<h2>Drafting Controls</h2><div id="draftKnowledge" class="knowledgeNote"></div>
+<h2>Drafting Controls</h2><div id="draftKnowledge" class="knowledgeNote"></div><div id="capabilities" class="capabilityStrip"></div>
 <p>Each slider and number box controls the same design measurement.</p>
 <div id="controls"></div>
 <label>Frame strength<select id="frame"><option value="light">Light timber/steel bracing</option><option value="standard">Standard reinforced frame</option><option value="heavy">Heavy reinforced frame</option></select></label>
 <div class="actions"><button id="undo" disabled>Undo</button><button id="redo" disabled>Redo</button></div>
 </section>
 
-<section class="panel notes"><h2 id="notebookTitle">Engineering Notebook</h2><p id="notebookContext" class="notebookContext">Observations are attached to individual committed revisions.</p><div id="notes"></div><hr><h3>Known ≠ Actual</h3><p>The simulation can know more than your company does. This notebook only reports discovered or reasonably inferred information.</p></section>
+<section class="panel notes"><h2 id="notebookTitle">Engineering Notebook</h2><p id="notebookContext" class="notebookContext">Observations are attached to individual committed revisions.</p><div id="notes"></div>
+<div id="revisionHistory" class="revisionHistory" hidden>
+<div class="historyHead"><h3>Revision History</h3><button id="closeHistory" type="button">Close</button></div>
+<p>Select a committed revision to inspect its frozen design and Engineering Notebook.</p>
+<div id="historyList" class="historyList"></div><div id="historyDetail"></div></div>
+<hr><h3>Known ≠ Actual</h3><p>The simulation can know more than your company does. This notebook only reports discovered or reasonably inferred information.</p></section>
 </div>
 </section>
 
@@ -51,5 +56,5 @@
 </main>
 
 <dialog id="compareDialog"><h2>Revision Comparison</h2><div id="comparison"></div><button id="closeCompare">Close</button></dialog>
-<script src="app.js?v=0221"></script>
+<script src="app.js?v=023"></script>
 </body></html>
